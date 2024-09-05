@@ -115,7 +115,7 @@ static void
 find_address_in_section (abfd, section, data)
      bfd *abfd;
      asection *section;
-     PTR data;
+     void* data;
 {
   bfd_vma vma;
   bfd_size_type size;
@@ -435,7 +435,7 @@ mpiP_find_src_loc (void *i_addr_hex, char **o_file_str, int *o_lineno,
 
   found = FALSE;
 
-  bfd_map_over_sections (abfd, find_address_in_section, (PTR) NULL);
+  bfd_map_over_sections (abfd, find_address_in_section, (void*) NULL);
 
 #ifdef SO_LOOKUP
   if (!found)
@@ -477,7 +477,7 @@ mpiP_find_src_loc (void *i_addr_hex, char **o_file_str, int *o_lineno,
           mpiPi_msg_debug ("fso->bfd->sections is %p\n",
                            ((bfd *) (fso->bfd))->sections);
           bfd_map_over_sections (fso->bfd, find_address_in_section,
-                                 (PTR) NULL);
+                                 (void*) NULL);
         }
 
     }
