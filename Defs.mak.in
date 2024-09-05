@@ -64,6 +64,9 @@ ifeq ($(OS),OSF1)
 endif
 
 ifeq ($(OS),Linux)
+  ifeq ($(ARCH), aarch64)
+    CPPFLAGS += -DAARCH64
+  endif
   ifeq ($(ARCH),i686)
     CPPFLAGS += -DIA32
   endif

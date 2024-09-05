@@ -231,6 +231,12 @@ extern void *MPIR_ToPointer (int idx);
 #define FramePC(fp) ((void *) *(long *) (((long) fp) + (2 * sizeof (void *))))
 #define NextFP(fp) ((void *) *(long *) fp)
 
+/*  AArch64 Linux  */
+#elif defined(Linux) && defined(AARCH64)
+#define ParentFP(jb) ((void*) jb[0].__jmpbuf[10])
+#define FramePC(fp) ((void*)(((void**)fp)[1]))
+#define NextFP(fp) ((void*)((void**)fp)[0])
+
 /*  IA32 Linux  */
 #elif defined(Linux) && defined(IA32)
 #define ParentFP(jb) ((void*) jb[0].__jmpbuf[3])
