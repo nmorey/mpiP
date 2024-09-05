@@ -1,38 +1,87 @@
-/* -*- C -*-
+#ifndef ARCH_GENERIC_H
+#define ARCH_GENERIC_H
 
-   mpiP MPI Profiler ( http://llnl.github.io/mpiP )
+#include <stdint.h>
+#include "mpiPconfig.h"
 
-   Please see COPYRIGHT AND LICENSE information at the end of this file.
 
-   -----
+static inline void mpiP_atomic_wmb(void)
+{
+    __atomic_thread_fence (__ATOMIC_RELEASE);
+}
 
-   arch.h -- architecture-specific code and definitions
+static inline void mpiP_atomic_isync(void)
+{
+}
 
- */
+#if (SIZEOF_VOIDP == 8)
+static inline void *mpiP_atomic_swap(void **_addr, void *_newval)
+{
+  int64_t *addr  = (int64_t *)_addr;
+  int64_t newval = (int64_t)_newval;
+  int64_t oldval;
 
-#ifndef ARCH_ATOMICS_H
-#define ARCH_ATOMICS_H
+  __atomic_exchange (addr, &newval, &oldval, __ATOMIC_RELAXED);
+  return (void*)oldval;
+}
 
-#ifdef __x86_64__
-#include "arch/arch_x86_64.h"
-#elif __ppc64__ || __ppc__ || __PPC64__
-#include "arch/arch_ppc.h"
-#elif __aarch64__
-#include "arch/arch_arm64.h"
+static inline int mpiP_atomic_cas(void **_addr, void **_oldval, void *_newval)
+{
+  int64_t *addr   = (int64_t*)_addr;
+  int64_t *oldval = (int64_t*)_oldval;
+  int64_t newval  = (int64_t)_newval;
+
+  return __atomic_compare_exchange_n (addr, oldval, newval, 0, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED);
+}
+
 #else
-#include "arch/arch_generic.h"
+
+static inline void *mpiP_atomic_swap(void **_addr, void *_newval)
+{
+  int32_t *addr= (int32_t *)_addr;
+  int32_t newval = (int32_t)_newval;
+  int32_t oldval;
+
+  __atomic_exchange (addr, &newval, &oldval, __ATOMIC_RELAXED);
+  return (void*)oldval;
+}
+
+
+static inline int mpiP_atomic_cas(void **_addr, void **_oldval, void *_newval)
+{
+  int32_t *addr = (int32_t*)_addr;
+  int32_t *oldval = (int32_t*)_oldval;
+  int32_t newval = (int32_t)_newval;
+
+  return __atomic_compare_exchange_n (addr, oldval, newval, 0, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED);
+}
 #endif
 
-#endif // ARCH_ATOMICS_H
+#endif
 
 
 /*
 
 <license>
 
-Copyright (c) 2019      Mellanox Technologies Ltd.
-Written by Artem Polyakov
-All rights reserved.
+This code was derived from Open MPI OPAL layer.
+
+Copyright (c) 2004-2005 The Trustees of Indiana University and Indiana
+                        University Research and Technology
+                        Corporation.  All rights reserved.
+Copyright (c) 2004-2010 The University of Tennessee and The University
+                        of Tennessee Research Foundation.  All rights
+                        reserved.
+Copyright (c) 2004-2005 High Performance Computing Center Stuttgart,
+                        University of Stuttgart.  All rights reserved.
+Copyright (c) 2004-2005 The Regents of the University of California.
+                        All rights reserved.
+Copyright (c) 2007      Sun Microsystems, Inc.  All rights reserverd.
+Copyright (c) 2012-2018 Los Alamos National Security, LLC. All rights
+                        reserved.
+Copyright (c) 2016-2017 Research Organization for Information Science
+                        and Technology (RIST). All rights reserved.
+Copyright (c) 2019      Mellanox Technologies Ltd. All rights reserved.
 
 This file is part of mpiP.  For details, see http://llnl.github.io/mpiP.
 
